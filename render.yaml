@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: recibo-de-gastos-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ASAAS_API_URL
+        value: https://api-sandbox.asaas.com/v3
+      - key: ASAAS_API_KEY
+        sync: false
+      - key: ASAAS_WEBHOOK_TOKEN
+        sync: false
+      - key: FRONTEND_URL
+        value: https://strong-lily-e11987.netlify.app
+      - key: TRIAL_DAYS
+        value: "10"
+      - key: SUBSCRIPTION_VALUE
+        value: "10.00"
