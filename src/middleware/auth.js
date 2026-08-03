@@ -18,4 +18,30 @@ async function requireAuth(req, res, next) {
   }
 }
 
-// Ca
+function accessInfo(user) {
+  const now = new Date();
+  const trialEndsAt = new Date(user.trial_ends_at);
+  const inTrial = user.subscription_status === 'trial' && now < trialEndsAt;
+  const active = user.subscription_status === 'active';
+  const hasAccess = inTrial || active;
+
+  return {
+    hasAccess,
+    status: user.subscription_status,
+    trialEndsAt: user.trial_ends_at,
+    currentPeriodEndsAt: user.current_period_ends_at,
+    daysLeftInTrial: inTrial
+      ? Math.max(0, Math.ceil((trialEndsAt - now) / (1000 * 60 * 60 * 24)))
+      : 0,
+  };
+}
+
+function requireActiveAccess(req, res, next) {
+  const info = accessInfo(req.user);
+  if (!info.hasAccess) {
+    return res.status(402).json({ error: 'Período de teste encerrado. Assine para continuar.', access: info });
+  }
+  next();
+}
+
+module.exports = { requireAuth, requireActiveAccess, accessInfo };
