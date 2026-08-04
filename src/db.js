@@ -30,6 +30,8 @@ async function initSchema() {
       description TEXT NOT NULL,
       amount NUMERIC(10,2) NOT NULL,
       category TEXT NOT NULL DEFAULT 'outros',
+      type TEXT NOT NULL DEFAULT 'expense',
+      -- type: 'expense' (despesa) ou 'income' (receita)
       raw_text TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
@@ -47,7 +49,13 @@ async function initSchema() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_expenses_user ON expenses(user_id);
+    CREATE INDEX IF NOT EXISTS idx_expenses_created_at ON expenses(created_at);
     CREATE INDEX IF NOT EXISTS idx_payments_user ON payments(user_id);
+  `);
+
+  // Migração segura para bancos já existentes (criados antes da coluna "type" existir).
+  await pool.query(`
+    ALTER TABLE expenses ADD COLUMN IF NOT EXISTS type TEXT NOT NULL DEFAULT 'expense';
   `);
 }
 
